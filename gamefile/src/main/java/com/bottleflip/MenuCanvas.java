@@ -1,5 +1,8 @@
 package com.bottleflip;
 import java.io.File;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
@@ -21,6 +24,10 @@ public class MenuCanvas{
     private Double height;
     private Double width;
     private MediaPlayer mediaPlayer;
+    private List<String> backgroundPaths = Arrays.asList(
+    "file:/Users/ryan/The Bottle Flip Project/gamefile/src/main/resources/nature_4/orig.png",
+    "file:/Users/ryan/The Bottle Flip Project/gamefile/src/main/resources/nature_8/orig.png");
+    private String currentBackgroundPath;
 
     public MenuCanvas(Stage stage, Double height, Double width) {
         this.stage = stage;
@@ -39,12 +46,23 @@ public class MenuCanvas{
        stage.setTitle("Bottle Flip !");
     
     }
+    private void  setupMenuScene(String currentBackgroundPath){
+        this.currentBackgroundPath=currentBackgroundPath;
+    }
+     private String  getupMenuScene(){
+     return currentBackgroundPath;
+    }
 
     public void setMenuDisplay() {
     
         //adding file path of image to the background;
-        Image mainBackground1 = new Image("file:/Users/ryan/The Bottle Flip Project/gamefile/src/main/resources/nature_4/orig.png");
-        Image mainBackground2= new Image("file:/Users/ryan/The Bottle Flip Project/gamefile/src/main/resources/nature_8/orig.png");
+        // Image mainBackground1 = new Image("file:/Users/ryan/The Bottle Flip Project/gamefile/src/main/resources/nature_4/orig.png");
+        // Image mainBackground2= new Image("file:/Users/ryan/The Bottle Flip Project/gamefile/src/main/resources/nature_8/orig.png");
+        Collections.shuffle(backgroundPaths); // randomize order
+        currentBackgroundPath = backgroundPaths.get(0);
+        setupMenuScene(currentBackgroundPath);
+        Image mainBackground = new Image(currentBackgroundPath); // pick the first one
+        ImageView backgroundView = new ImageView(mainBackground);
 
         //adding music file for menus;
 
@@ -55,9 +73,8 @@ public class MenuCanvas{
         mediaPlayer.play();
 
         //displaying image ;
-        ImageView backgroundView = new ImageView(mainBackground1);
-        backgroundView.setFitWidth(width);  // Optional: set desired width
-        backgroundView.setFitHeight(height); // Optional: set desired height
+        backgroundView.setFitWidth(width);
+        backgroundView.setFitHeight(height);
         backgroundView.setPreserveRatio(false);
 
         //initiating menu for holding buttons
@@ -84,20 +101,18 @@ public class MenuCanvas{
 
         //event managing:
         buttonOptions.setOnMouseClicked(event -> {
-            setOptionsDiplay(MenuScene);
+            setOptionsDiplay(MenuScene, mediaPlayer,backgroundView);
         });
          buttonExit.setOnMouseClicked(event -> {
             Platform.exit();
         });
         
         stage.setScene(MenuScene);
-        stage.show();
-
-         
+        stage.show();    
        
 }
 
-public void setOptionsDiplay(Scene scene){
+public void setOptionsDiplay(Scene scene, MediaPlayer musicPlaying, ImageView backgroundView){
 
     
     StackPane optionsLayout = new StackPane();
@@ -110,15 +125,34 @@ public void setOptionsDiplay(Scene scene){
     optionsBox.setAlignment(Pos.CENTER);
     optionsBox.getChildren().addAll(buttonAudio,buttonBack);
 
+    //buttons and background in options
+    Image mainBackground = new Image(currentBackgroundPath); // pick the first one
+    ImageView backgroundOption = new ImageView(mainBackground);
+            //displaying image ;
+                backgroundOption.setFitWidth(width);
+                backgroundOption.setFitHeight(height);
+                backgroundOption.setPreserveRatio(false);
+    optionsLayout.getChildren().add(backgroundOption);
     optionsLayout.getChildren().add(optionsBox);
+    
 
     Scene optionScene= new Scene(optionsLayout);
 
     stage.setScene(optionScene);
+   
 
-    //button action;
+    //button action, handeling in options menu;
     buttonBack.setOnMouseClicked((event) -> {
-        stage.setScene(scene);
+        stage.setScene(scene);    
+    });
+    buttonAudio.setOnMouseClicked((event) -> {
+        if(musicPlaying!=null){
+            if (mediaPlayer.getStatus() == MediaPlayer.Status.PLAYING) {
+                mediaPlayer.pause();
+            } else {
+                mediaPlayer.play();
+            }
+        }
     });
 
 }
