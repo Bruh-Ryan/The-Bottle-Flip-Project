@@ -8,7 +8,7 @@ public class App extends Application {
     @Override
     public void start(Stage primaryStage) {
       try {
-        MenuCanvas startGame = new MenuCanvas(primaryStage, 720.0, 580.0);
+        MenuCanvas startGame = new MenuCanvas(primaryStage, 840.0, 580.0);
         startGame.setMenuDisplay();
           
       } catch (Exception e) {

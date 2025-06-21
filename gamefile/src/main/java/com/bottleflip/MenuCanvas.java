@@ -1,4 +1,5 @@
 package com.bottleflip;
+
 import java.io.File;
 import java.util.Arrays;
 import java.util.Collections;
@@ -23,11 +24,11 @@ public class MenuCanvas{
     private Stage stage;
     private Double height;
     private Double width;
-    private MediaPlayer mediaPlayer;
-    private List<String> backgroundPaths = Arrays.asList(
+    protected MediaPlayer mediaPlayer;
+    public List<String> backgroundPaths = Arrays.asList(
     "file:/Users/ryan/The Bottle Flip Project/gamefile/src/main/resources/nature_4/orig.png",
     "file:/Users/ryan/The Bottle Flip Project/gamefile/src/main/resources/nature_8/orig.png");
-    private String currentBackgroundPath;
+    protected String currentBackgroundPath;
 
     public MenuCanvas(Stage stage, Double height, Double width) {
         this.stage = stage;
@@ -100,6 +101,9 @@ public class MenuCanvas{
         Scene MenuScene = new Scene(menuLayout, width, height);
 
         //event managing:
+         buttonStart.setOnMouseClicked(event -> {
+            new GameCanvas(stage, width,height, mediaPlayer);//game canvas Class here
+        });
         buttonOptions.setOnMouseClicked(event -> {
             setOptionsDiplay(MenuScene, mediaPlayer,backgroundView);
         });
@@ -108,6 +112,7 @@ public class MenuCanvas{
         });
         
         stage.setScene(MenuScene);
+        
         stage.show();    
        
 }
@@ -155,6 +160,44 @@ public void setOptionsDiplay(Scene scene, MediaPlayer musicPlaying, ImageView ba
         }
     });
 
+}
+
+public Scene getOptionsScene(Scene returnToScene) {
+    StackPane optionsLayout = new StackPane();
+    optionsLayout.setAlignment(Pos.TOP_RIGHT);
+
+    // Re-use current background
+    Image mainBackground = new Image(currentBackgroundPath);
+    ImageView backgroundOption = new ImageView(mainBackground);
+    backgroundOption.setFitWidth(width);
+    backgroundOption.setFitHeight(height);
+    backgroundOption.setPreserveRatio(false);
+
+    // Buttons
+    Button buttonAudio = new Button(mediaPlayer.getStatus() == MediaPlayer.Status.PLAYING ? "Mute" : "Unmute");
+    Button buttonBack = new Button("<- Back");
+
+    // Audio toggle
+    buttonAudio.setOnMouseClicked(event -> {
+        if (mediaPlayer != null) {
+            if (mediaPlayer.getStatus() == MediaPlayer.Status.PLAYING) {
+                mediaPlayer.pause();
+                buttonAudio.setText("Unmute");
+            } else {
+                mediaPlayer.play();
+                buttonAudio.setText("Mute");
+            }
+        }
+    });
+
+    // Back to previous scene
+    buttonBack.setOnMouseClicked(event -> stage.setScene(returnToScene));
+
+    VBox optionsBox = new VBox(10, buttonAudio, buttonBack);
+    optionsBox.setAlignment(Pos.CENTER);
+
+    optionsLayout.getChildren().addAll(backgroundOption, optionsBox);
+    return new Scene(optionsLayout, width, height);
 }
     
 }
