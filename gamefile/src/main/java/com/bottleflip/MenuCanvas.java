@@ -5,8 +5,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import javafx.scene.media.Media;
-import javafx.scene.media.MediaPlayer;
 import javafx.application.Platform;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -15,6 +13,8 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
 import javafx.stage.Stage;
 
 
@@ -25,6 +25,7 @@ public class MenuCanvas{
     private Double height;
     private Double width;
     protected MediaPlayer mediaPlayer;
+    protected Scene MenuScene;
     public List<String> backgroundPaths = Arrays.asList(
     "file:/Users/ryan/The Bottle Flip Project/gamefile/src/main/resources/nature_4/orig.png",
     "file:/Users/ryan/The Bottle Flip Project/gamefile/src/main/resources/nature_8/orig.png");
@@ -93,21 +94,22 @@ public class MenuCanvas{
         buttonholds.getChildren().addAll(buttonStart, buttonOptions, buttonExit);
         
         //menulayout holding children nodes here button, and background view
-        //member there is a hierachy so suppose you put backgrounds after buttonholds then the scene would only render background , so there is a stack hiereachy
+        //remember there is a hierachy so suppose you put backgrounds after buttonholds then the scene would only render background , so there is a stack hiereachy
         menuLayout.getChildren().add(backgroundView);
         menuLayout.getChildren().add(buttonholds);
         
 
-        Scene MenuScene = new Scene(menuLayout, width, height);
+        MenuScene = new Scene(menuLayout, width, height);
 
         //event managing:
-         buttonStart.setOnMouseClicked(event -> {
-            new GameCanvas(stage, width,height, mediaPlayer);//game canvas Class here
+         buttonStart.setOnMouseClicked(event -> {  //handles start button
+             GameCanvas game = new GameCanvas(stage, this, width,height, mediaPlayer);//game canvas Class here
+             
         });
-        buttonOptions.setOnMouseClicked(event -> {
-            setOptionsDiplay(MenuScene, mediaPlayer,backgroundView);
+        buttonOptions.setOnMouseClicked(event -> {   //handels otpions
+            stage.setScene(getOptionsScene(MenuScene));
         });
-         buttonExit.setOnMouseClicked(event -> {
+         buttonExit.setOnMouseClicked(event -> {    //handles exit button
             Platform.exit();
         });
         
@@ -115,51 +117,6 @@ public class MenuCanvas{
         
         stage.show();    
        
-}
-
-public void setOptionsDiplay(Scene scene, MediaPlayer musicPlaying, ImageView backgroundView){
-
-    
-    StackPane optionsLayout = new StackPane();
-    optionsLayout.setAlignment(Pos.TOP_RIGHT);
-
-    Button buttonAudio = new Button("Toggle Audio");
-    Button buttonBack = new Button("<-Back<-");
-
-    VBox optionsBox= new VBox(10);
-    optionsBox.setAlignment(Pos.CENTER);
-    optionsBox.getChildren().addAll(buttonAudio,buttonBack);
-
-    //buttons and background in options
-    Image mainBackground = new Image(currentBackgroundPath); // pick the first one
-    ImageView backgroundOption = new ImageView(mainBackground);
-            //displaying image ;
-                backgroundOption.setFitWidth(width);
-                backgroundOption.setFitHeight(height);
-                backgroundOption.setPreserveRatio(false);
-    optionsLayout.getChildren().add(backgroundOption);
-    optionsLayout.getChildren().add(optionsBox);
-    
-
-    Scene optionScene= new Scene(optionsLayout);
-
-    stage.setScene(optionScene);
-   
-
-    //button action, handeling in options menu;
-    buttonBack.setOnMouseClicked((event) -> {
-        stage.setScene(scene);    
-    });
-    buttonAudio.setOnMouseClicked((event) -> {
-        if(musicPlaying!=null){
-            if (mediaPlayer.getStatus() == MediaPlayer.Status.PLAYING) {
-                mediaPlayer.pause();
-            } else {
-                mediaPlayer.play();
-            }
-        }
-    });
-
 }
 
 public Scene getOptionsScene(Scene returnToScene) {
@@ -176,6 +133,7 @@ public Scene getOptionsScene(Scene returnToScene) {
     // Buttons
     Button buttonAudio = new Button(mediaPlayer.getStatus() == MediaPlayer.Status.PLAYING ? "Mute" : "Unmute");
     Button buttonBack = new Button("<- Back");
+    Button buttonMainMenu = new Button("Main Menu");
 
     // Audio toggle
     buttonAudio.setOnMouseClicked(event -> {
@@ -193,11 +151,16 @@ public Scene getOptionsScene(Scene returnToScene) {
     // Back to previous scene
     buttonBack.setOnMouseClicked(event -> stage.setScene(returnToScene));
 
-    VBox optionsBox = new VBox(10, buttonAudio, buttonBack);
+    // Back to main menu
+    buttonMainMenu.setOnMouseClicked(event -> stage.setScene(MenuScene));
+
+    VBox optionsBox = new VBox(10, buttonAudio, buttonBack, buttonMainMenu);
     optionsBox.setAlignment(Pos.CENTER);
 
     optionsLayout.getChildren().addAll(backgroundOption, optionsBox);
     return new Scene(optionsLayout, width, height);
 }
-    
+public Scene getMenuScene() {
+    return this.MenuScene;
+}
 }
