@@ -4,14 +4,12 @@ import java.util.Arrays;
 import java.util.List;
 
 import javafx.animation.AnimationTimer;
-import javafx.geometry.Insets;
-import javafx.geometry.Point2D;
-import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.StackPane;
+import javafx.scene.input.KeyCode;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.text.Text;
@@ -19,14 +17,14 @@ import javafx.stage.Stage;
 
 public class GameCanvas extends MenuCanvas {
 
-    private double GROUND_Y=0.0;
-    private final double BOTTLE_HEIGHT = 64; // same as fitWidth if square image
     private Stage stage;
     private double height;
     private double width;
     private int score;
     ImageView bottle_image;
     private MenuCanvas menuCanvas;
+    private double x_bottle_loc_new=0.0;//moving mouse event in start canvas
+    private double y_bottle_loc_new=0.0;
     public List<String> select_a_game_background = Arrays.asList("file:gamefile/src/main/resources/GameBackGround/city 1/10.png",
     "file:gamefile/src/main/resources/GameBackGround/city 2/10.png");
 
@@ -48,19 +46,19 @@ public class GameCanvas extends MenuCanvas {
         stage.setTitle("Bottle Flip !");
 
         // HUD for game
-        StackPane gameHud = new StackPane();
+        Pane gameHud = new Pane();
         gameHud.setPrefSize(width, height);
 
         Text gameScore = new Text("Game Score:" + score);
-        VBox hudHolderTop = new VBox(gameScore);
-        hudHolderTop.setAlignment(Pos.TOP_RIGHT);
-        hudHolderTop.setPadding(new Insets(10));
+        VBox scoreHudVBox = new VBox(gameScore);
+        scoreHudVBox.setLayoutX(width-100);
 
         // Buttons for game menu
         Button buttonOptions = new Button("<-");
         Button buttonMainMenu = new Button("Main Menu");
         VBox buttonSettingsOptions = new VBox(buttonOptions, buttonMainMenu);
-        buttonSettingsOptions.setAlignment(Pos.TOP_LEFT);
+        buttonSettingsOptions.setLayoutX(10);
+        buttonSettingsOptions.setLayoutX(10);
 
         // Button actions
         buttonOptions.setOnMouseClicked(e -> {
@@ -75,105 +73,126 @@ public class GameCanvas extends MenuCanvas {
         //select background and add canvas:
         //then send that scene to the next class for game logic and rendering
 
+        /// remember there is a glitch with button presses so its because of the offset, use an array to solve that!!
+
         Image bottle = new Image(getClass().getResource("/CowboyBitpop_Bottles_32x32/Bottles_32x32_02.png").toExternalForm());
         bottle_image= new ImageView(bottle);
-        StackPane.setAlignment(bottle_image, Pos.BOTTOM_CENTER);
         bottle_image.setFitWidth(64); // or 100
         bottle_image.setPreserveRatio(true);
-        GROUND_Y=bottle_image.getY();
-        
-   
-
+        bottle_image.setLayoutX(width/2-(bottle_image.getImage().getWidth()/2));//initial X position
+        bottle_image.setLayoutY(height-(bottle_image.getImage().getHeight())*4);//inital height
+                // Offset variables
+        final double[] offsetX = new double[1];
+        final double[] offsetY = new double[1];
+        final double[] initialX =new double[1];
+        final double[] initialY =new double[1];
          // Add HUD and buttons to StackPane
-        gameHud.getChildren().addAll(hudHolderTop, buttonSettingsOptions, bottle_image);
+        gameHud.getChildren().addAll(scoreHudVBox,buttonSettingsOptions, bottle_image);
         // Set scene
         Scene gameScene = new Scene(gameHud, width, height);
         // cube 
-        play(gameScene, bottle_image, GROUND_Y);
-    }
-    //physics constants
-    private  final double GRAVITY = 500.0; // Pixels/s^2
-    private  final double DAMPING = 0.99; // Air resistance
-    private  final double UPRIGHT_THRESHOLD = Math.toRadians(10); // 10 degrees
+        //on mouse click;reset
+        initialX[0]=bottle_image.getLayoutX();
+        initialY[0]=bottle_image.getLayoutY();
     
+        boolean left= false;
+        boolean right=false;
+        final long[] pressTime = new long[1]; // stores press time
 
-    //bottle event state
-    private boolean landed = true;
-    private double y = GROUND_Y; // Position (bottom of bottle)
-    private double vy = 0; // Vertical velocity
-    private double theta = 0; // Rotation angle (radians)
-    private double omega = 0; // Angular velocity (radians/s)
+        //press
+        bottle_image.setOnMousePressed(event -> {
+            pressTime[0] = System.currentTimeMillis(); // start timer
+            
+        });
 
-    //mouse events
-    // Mouse interaction
-    private Point2D mouseStart;
-    private long mouseStartTime;
-   
-    public void play(Scene gameScene, ImageView bottleImage, double groundY) {
-    bottleImage.setOnMousePressed(event -> {
-        mouseStart = new Point2D(event.getSceneX(), event.getSceneY());
-        mouseStartTime = System.nanoTime();
-        if (landed) {
-            landed = false;
-        }
-        System.out.println("Mouse press at: " + mouseStart);
-    });
+        //on drag; move
+        bottle_image.setOnMouseDragged((mouseEvent) -> {
+            bottle_image.setLayoutX(mouseEvent.getSceneX() - offsetX[0]);
+            bottle_image.setLayoutY(mouseEvent.getSceneY() - offsetY[0]);
+            // long releaseTime = System.currentTimeMillis();
+            // double elapsedSeconds = (releaseTime - pressTime[0]) / 1000.0;
 
-    // Optionally, you can add drag or release listeners too
-    bottleImage.setOnMouseReleased(event -> {
-        Point2D mouseEnd = new Point2D(event.getSceneX(), event.getSceneY());
-        long mouseEndTime = System.nanoTime();
-        double dragDuration = (mouseEndTime - mouseStartTime) / 1e9;
+            // //how to flip logic!
+            // //width/2 is the middle if movement is > middle then bottle flips +90deg clock wise
+            // double distance;
+            // double vel;
+           
+            // distance=Math.pow(mouseEvent.getSceneX()- offsetX[0],2)+Math.pow(mouseEvent.getSceneY() - offsetY[0],2);
+            // vel=distance/elapsedSeconds;
 
-        Point2D velocity = mouseStart.subtract(mouseEnd).multiply(1 / dragDuration);
-        System.out.println("Velocity: " + velocity);
-    });
+            System.out.println("X position of bottle :"+bottle_image.getLayoutX()+" Y position of bottle :"+bottle_image.getLayoutY());
+            // System.out.println("Velocity:"+vel);
+            // vel=0.0;
+        });
 
-     AnimationTimer timer = new AnimationTimer() {
-            private long lastTime = 0;
+        bottle_image.setOnMouseReleased((mouseEvent)->{
+            long releaseTime = System.currentTimeMillis();
+            double dt = (releaseTime - pressTime[0]) / 1000.0;
 
+            double dx = mouseEvent.getSceneX() - initialX[0];
+            double dy = mouseEvent.getSceneY() - initialY[0];
+            double distance = Math.sqrt(dx * dx + dy * dy);
+            double velocity = distance / dt;
+            double direction = dx >= 0 ? 1 : -1;
+
+            System.out.println("Velocity: " + velocity);
+
+            if (velocity > 300) {
+                animateBottleFlip(direction, velocity);
+            }
+        });
+        //reset variables
+        gameScene.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.R) {
+                bottle_image.setLayoutX(initialX[0]);
+                bottle_image.setLayoutY(initialY[0]);
+                 bottle_image.setRotate(theta[0]);
+
+                System.out.println("RESET: X position of bottle :"+bottle_image.getLayoutX()+" Y position of bottle :"+bottle_image.getLayoutY());
+            }
+        });
+
+        stage.setScene(gameScene);
+        stage.show();  
+    }
+     final double[] theta=new double[1];
+     private void animateBottleFlip(double direction, double velocity) {
+        final double GRAVITY = 980;
+        final double DAMPING = 0.985;
+        final double[] vy = { -velocity };
+        final double[] y = { bottle_image.getLayoutY() };
+        final double[] omega = { 720 * direction };
+        final double[] theta = { bottle_image.getRotate() };
+
+        new AnimationTimer() {
+            long lastTime = -1;
             @Override
             public void handle(long now) {
-                if (lastTime == 0) {
+                if (lastTime < 0) {
                     lastTime = now;
                     return;
                 }
-                double dt = (now - lastTime) * 1e-9; // Seconds
+
+                double elapsed = (now - lastTime) / 1_000_000_000.0;
                 lastTime = now;
 
-                if (!landed) {
-                    // Update physics
-                    vy += GRAVITY * dt;
-                    y += vy * dt;
-                    omega *= DAMPING;
-                    theta += omega * dt;
+                vy[0] += GRAVITY * elapsed; // 1. Update vertical velocity due to gravity
+                y[0] += vy[0] * elapsed;    // 2. Update position based on velocity
+                omega[0] *= DAMPING;        // 3. Apply damping to slow down rotation
+                theta[0] += omega[0] * elapsed; // 4. Update rotation angle
 
-                    // Check for ground collision
-                    if (y >= GROUND_Y) {
-                        y = GROUND_Y;
-                        vy = 0;
-                        if (Math.abs(theta % (2 * Math.PI)) < UPRIGHT_THRESHOLD ||
-                            Math.abs(theta % (2 * Math.PI) - 2 * Math.PI) < UPRIGHT_THRESHOLD) {
-                            // Successful landing
-                            landed = true;
-                            theta = 0;
-                            omega = 0;
-                        } else {
-                            // Failed landing
-                            omega *= 0.5; // Reduce rotation
-                        }
-                    }
+                bottle_image.setLayoutY(y[0]);
+                bottle_image.setRotate(theta[0]);
 
-                    // Update bottle position and rotation
-                    bottleImage.setY(y - BOTTLE_HEIGHT);
-                    bottleImage.setRotate(Math.toDegrees(theta));
+                if (y[0] >= height - bottle_image.getFitHeight()) {
+                    bottle_image.setLayoutY(height - bottle_image.getFitHeight());
+                    stop();
                 }
+               
             }
-        };
-        timer.start();
+        }.start();
+        
+    }
 
-    stage.setScene(gameScene);
-    stage.show();
-}
-    
-}
+    }
+ 
