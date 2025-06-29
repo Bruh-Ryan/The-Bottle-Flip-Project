@@ -17,6 +17,11 @@ import javafx.stage.Stage;
 
 public class GameCanvas extends MenuCanvas {
 
+            // Offset variables
+        final double[] offsetX = new double[1];
+        final double[] offsetY = new double[1];
+        final double[] initialX =new double[1];
+        final double[] initialY =new double[1];
     private Stage stage;
     private double height;
     private double width;
@@ -49,7 +54,7 @@ public class GameCanvas extends MenuCanvas {
         Pane gameHud = new Pane();
         gameHud.setPrefSize(width, height);
 
-        Text gameScore = new Text("Game Score:" + score);
+        Text gameScore = new Text("Game Score:" + score);////SCORE!!!!!!!!!!!!!!!!!!!!!!!!!!!
         VBox scoreHudVBox = new VBox(gameScore);
         scoreHudVBox.setLayoutX(width-100);
 
@@ -81,11 +86,7 @@ public class GameCanvas extends MenuCanvas {
         bottle_image.setPreserveRatio(true);
         bottle_image.setLayoutX(width/2-(bottle_image.getImage().getWidth()/2));//initial X position
         bottle_image.setLayoutY(height-(bottle_image.getImage().getHeight())*4);//inital height
-                // Offset variables
-        final double[] offsetX = new double[1];
-        final double[] offsetY = new double[1];
-        final double[] initialX =new double[1];
-        final double[] initialY =new double[1];
+        
          // Add HUD and buttons to StackPane
         gameHud.getChildren().addAll(scoreHudVBox,buttonSettingsOptions, bottle_image);
         // Set scene
@@ -138,7 +139,8 @@ public class GameCanvas extends MenuCanvas {
             System.out.println("Velocity: " + velocity);
 
             if (velocity > 300) {
-                animateBottleFlip(direction, velocity);
+                animateBottleFlip(direction, velocity);//SCORE UPDATEEEEEE!!!!!!!!!!!
+                gameScore.setText("Game Score:" + score );
             }
         });
         //reset variables
@@ -146,16 +148,20 @@ public class GameCanvas extends MenuCanvas {
             if (event.getCode() == KeyCode.R) {
                 bottle_image.setLayoutX(initialX[0]);
                 bottle_image.setLayoutY(initialY[0]);
-                 bottle_image.setRotate(theta[0]);
+                bottle_image.setRotate(0); 
 
-                System.out.println("RESET: X position of bottle :"+bottle_image.getLayoutX()+" Y position of bottle :"+bottle_image.getLayoutY());
+                System.out.println("RESET: X position of bottle :"+bottle_image.getLayoutX()+" Y position of bottle :"+bottle_image.getLayoutY()+" Rotation :"+bottle_image.getRotate());
             }
         });
 
         stage.setScene(gameScene);
         stage.show();  
     }
+    
      final double[] theta=new double[1];
+     private  final double UPRIGHT_THRESHOLD = Math.toRadians(20); // 20 degrees
+     private boolean landed=false;
+
      private void animateBottleFlip(double direction, double velocity) {
         final double GRAVITY = 980;
         final double DAMPING = 0.985;
@@ -163,6 +169,8 @@ public class GameCanvas extends MenuCanvas {
         final double[] y = { bottle_image.getLayoutY() };
         final double[] omega = { 720 * direction };
         final double[] theta = { bottle_image.getRotate() };
+        
+        
 
         new AnimationTimer() {
             long lastTime = -1;
@@ -184,13 +192,35 @@ public class GameCanvas extends MenuCanvas {
                 bottle_image.setLayoutY(y[0]);
                 bottle_image.setRotate(theta[0]);
 
-                if (y[0] >= height - bottle_image.getFitHeight()) {
+                if (y[0] >= initialY[0]) {
                     bottle_image.setLayoutY(height - bottle_image.getFitHeight());
                     stop();
                 }
-               
-            }
+
+                if (y[0] >= initialY[0]) {///////////////
+                    y[0] = initialY[0];
+                    vy[0]=0;
+                    if (Math.abs(theta[0] % (2 * Math.PI)) < UPRIGHT_THRESHOLD ||
+                            Math.abs(theta[0] % (2 * Math.PI) - 2 * Math.PI) < UPRIGHT_THRESHOLD) {
+                            // Successful landing
+                            landed = true;
+                            if(landed){
+                                score+=1;
+                            }
+                            System.out.println("(score)"+score);
+                            theta[0] = 0;
+                            omega[0] = 0;
+                        } else {
+                            // Failed landing
+                            omega[0] *= 0.5; // Reduce rotation
+                        }
+                        bottle_image.setLayoutY(y[0]);
+                        bottle_image.setRotate(theta[0]);
+                    }
+                }
         }.start();
+
+       
         
     }
 
