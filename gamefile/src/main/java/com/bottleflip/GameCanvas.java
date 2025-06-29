@@ -1,9 +1,7 @@
 package com.bottleflip;
 
-import java.util.Arrays;
-import java.util.List;
-
 import javafx.animation.AnimationTimer;
+import javafx.animation.FadeTransition;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.image.Image;
@@ -14,6 +12,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 public class GameCanvas extends MenuCanvas {
 
@@ -27,11 +26,11 @@ public class GameCanvas extends MenuCanvas {
     private double width;
     private int score;
     ImageView bottle_image;
+    ImageView bgImageView;
     private MenuCanvas menuCanvas;
     private double x_bottle_loc_new=0.0;//moving mouse event in start canvas
     private double y_bottle_loc_new=0.0;
-    public List<String> select_a_game_background = Arrays.asList("file:gamefile/src/main/resources/GameBackGround/city 1/10.png",
-    "file:gamefile/src/main/resources/GameBackGround/city 2/10.png");
+   
 
     public GameCanvas(Stage stage, MenuCanvas menuCanvas, double width, double height, MediaPlayer mediaPlayer) {
         super(stage, height, width);
@@ -54,6 +53,7 @@ public class GameCanvas extends MenuCanvas {
         Pane gameHud = new Pane();
         gameHud.setPrefSize(width, height);
 
+       
         Text gameScore = new Text("Game Score:" + score);////SCORE!!!!!!!!!!!!!!!!!!!!!!!!!!!
         VBox scoreHudVBox = new VBox(gameScore);
         scoreHudVBox.setLayoutX(width-100);
@@ -77,18 +77,36 @@ public class GameCanvas extends MenuCanvas {
 
         //select background and add canvas:
         //then send that scene to the next class for game logic and rendering
-
+        //transitions:::::;
+        FadeTransition fade = new FadeTransition(Duration.seconds(3), bgImageView);
+        fade.setFromValue(0.0); // Fully transparent
+        fade.setToValue(1.0);   // Fully opaque
+        fade.setCycleCount(1);  // Only once
+        fade.play();
+        ///background image. 
+        Image bgImage= new Image(getClass().getResource("/GameBackGround/city 1/10.png").toExternalForm());
+        bgImageView = new ImageView(bgImage);                                                          ///background image
+        bgImageView.setFitWidth(width);         // Full scene width
+        bgImageView.setFitHeight(height);       // Full scene height
+        bgImageView.setPreserveRatio(false);    // Stretch to fit the scene (optional)  
         /// remember there is a glitch with button presses so its because of the offset, use an array to solve that!!
+        /// 
 
         Image bottle = new Image(getClass().getResource("/CowboyBitpop_Bottles_32x32/Bottles_32x32_02.png").toExternalForm());
         bottle_image= new ImageView(bottle);
-        bottle_image.setFitWidth(64); // or 100
+        bottle_image.setFitWidth(80); // or 100
         bottle_image.setPreserveRatio(true);
         bottle_image.setLayoutX(width/2-(bottle_image.getImage().getWidth()/2));//initial X position
         bottle_image.setLayoutY(height-(bottle_image.getImage().getHeight())*4);//inital height
+        bottle_image.setOpacity(100);
+
+
+       
         
+
          // Add HUD and buttons to StackPane
-        gameHud.getChildren().addAll(scoreHudVBox,buttonSettingsOptions, bottle_image);
+       gameHud.getChildren().addAll(bgImageView, scoreHudVBox, buttonSettingsOptions, bottle_image);
+
         // Set scene
         Scene gameScene = new Scene(gameHud, width, height);
         // cube 
@@ -139,8 +157,18 @@ public class GameCanvas extends MenuCanvas {
             System.out.println("Velocity: " + velocity);
 
             if (velocity > 300) {
+               
                 animateBottleFlip(direction, velocity);//SCORE UPDATEEEEEE!!!!!!!!!!!
-                gameScore.setText("Game Score:" + score );
+                gameScore.setText("Game Score :" + score );
+                // gameStats.setText("Rotation :" +bottle_image.getRotate()+"\n Distance :"+ distance);
+                // gameStats.setLayoutX(width-100);
+                // gameStats.setLayoutY(50);
+                // FadeTransition fade = new FadeTransition(Duration.seconds(2), gameStats);
+                // fade.setFromValue(0.0);
+                // fade.setToValue(1.0);
+                // fade.setCycleCount(FadeTransition.INDEFINITE);
+                // fade.setAutoReverse(true);
+                // fade.play();
             }
         });
         //reset variables
@@ -159,7 +187,7 @@ public class GameCanvas extends MenuCanvas {
     }
     
      final double[] theta=new double[1];
-     private  final double UPRIGHT_THRESHOLD = Math.toRadians(20); // 20 degrees
+     private  final double UPRIGHT_THRESHOLD = Math.toRadians(10); // 20 degrees
      private boolean landed=false;
 
      private void animateBottleFlip(double direction, double velocity) {
@@ -171,7 +199,6 @@ public class GameCanvas extends MenuCanvas {
         final double[] theta = { bottle_image.getRotate() };
         
         
-
         new AnimationTimer() {
             long lastTime = -1;
             @Override
@@ -191,6 +218,7 @@ public class GameCanvas extends MenuCanvas {
 
                 bottle_image.setLayoutY(y[0]);
                 bottle_image.setRotate(theta[0]);
+               
 
                 if (y[0] >= initialY[0]) {
                     bottle_image.setLayoutY(height - bottle_image.getFitHeight());
@@ -205,7 +233,16 @@ public class GameCanvas extends MenuCanvas {
                             // Successful landing
                             landed = true;
                             if(landed){
-                                score+=1;
+                                if(velocity<1000){
+                                    score+=1;
+                                }
+                                else if(velocity<=4999){
+                                    score+=2;
+                                }
+                                else if(velocity>=5000){
+                                    score+=5;
+                                }
+           
                             }
                             System.out.println("(score)"+score);
                             theta[0] = 0;
@@ -213,12 +250,17 @@ public class GameCanvas extends MenuCanvas {
                         } else {
                             // Failed landing
                             omega[0] *= 0.5; // Reduce rotation
+                            System.out.println("GET LUCK NEXT TIME");
+
                         }
                         bottle_image.setLayoutY(y[0]);
                         bottle_image.setRotate(theta[0]);
+                        System.out.println(bottle_image.getRotate());
+                        System.out.println(bottle_image.getLayoutY());
                     }
                 }
         }.start();
+
 
        
         

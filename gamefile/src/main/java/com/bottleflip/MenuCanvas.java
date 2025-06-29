@@ -61,6 +61,7 @@ public class MenuCanvas{
         // Image mainBackground1 = new Image("file:/Users/ryan/The Bottle Flip Project/gamefile/src/main/resources/nature_4/orig.png");
         // Image mainBackground2= new Image("file:/Users/ryan/The Bottle Flip Project/gamefile/src/main/resources/nature_8/orig.png");
         Collections.shuffle(backgroundPaths); // randomize order
+        
         currentBackgroundPath = backgroundPaths.get(0);
         setupMenuScene(currentBackgroundPath);
         Image mainBackground = new Image(currentBackgroundPath); // pick the first one
