@@ -33,7 +33,7 @@ https://github.com/user-attachments/assets/08675f08-91ef-4c76-b8db-396323bc4de3
 1. Clone the repository:
 ```bash
 git clone https://github.com/Bruh-Ryan/The-Bottle-Flip-Project.git
-cd bottle-flip-game
+cd The-Bottle-Flip-Project
 ```
 
 2. Build the project using Maven:
@@ -46,18 +46,14 @@ mvn clean compile
 mvn javafx:run
 ```
 
-Alternatively, you can package and run:
-```bash
-mvn clean package
-java -jar target/bottle-flip-game-[version].jar
-```
-
 ## How to Play
 
 1. Launch the game
 2. Click or use designated controls to flip the bottle
-3. Try to land the bottle upright to score points
-4. Challenge yourself to achieve higher scores with consecutive successful flips
+3. Pressing 'R' key is for rest bottle positions.
+4. The Score system goes like, 1P for <1000, 2P for <4999 and 3P for >5000unit distance.
+5. Try to land the bottle upright to score points
+6. Challenge yourself to achieve higher scores with consecutive successful flips
 
 ## Known Issues
 
