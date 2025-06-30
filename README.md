@@ -18,6 +18,7 @@ https://github.com/user-attachments/assets/08675f08-91ef-4c76-b8db-396323bc4de3
 
 - **Java**: Core programming language
 - **JavaFX**: GUI framework for creating the user interface and handling graphics
+- **Maven**: Build automation and dependency management
 - **Object-Oriented Programming**: Clean code architecture with proper class design
 
 ## Getting Started
@@ -25,7 +26,7 @@ https://github.com/user-attachments/assets/08675f08-91ef-4c76-b8db-396323bc4de3
 ### Prerequisites
 
 - Java Development Kit (JDK) 8 or higher
-- JavaFX SDK (if not included with your JDK)
+- Apache Maven 3.6 or higher
 
 ### Installation
 
@@ -35,14 +36,20 @@ git clone [your-repository-url]
 cd bottle-flip-game
 ```
 
-2. Compile the Java files:
+2. Build the project using Maven:
 ```bash
-javac --module-path /path/to/javafx/lib --add-modules javafx.controls,javafx.fxml *.java
+mvn clean compile
 ```
 
 3. Run the game:
 ```bash
-java --module-path /path/to/javafx/lib --add-modules javafx.controls,javafx.fxml MainClass
+mvn javafx:run
+```
+
+Alternatively, you can package and run:
+```bash
+mvn clean package
+java -jar target/bottle-flip-game-[version].jar
 ```
 
 ## How to Play
