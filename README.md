@@ -32,7 +32,7 @@ https://github.com/user-attachments/assets/08675f08-91ef-4c76-b8db-396323bc4de3
 
 1. Clone the repository:
 ```bash
-git clone [your-repository-url]
+git clone https://github.com/Bruh-Ryan/The-Bottle-Flip-Project.git
 cd bottle-flip-game
 ```
 
